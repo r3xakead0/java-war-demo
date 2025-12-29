@@ -1,37 +1,62 @@
 # Java WAR Demo (Tomcat + Docker + GitHub Actions)
 
-Demo simple de una **aplicación web Java (frontend + backend)** empaquetada como **WAR**, desplegada en **Apache Tomcat** dentro de **Docker**, con **GitHub Actions** para CI/CD.
+Simple demo of a Java web application (frontend + backend) packaged as a WAR, deployed on Apache Tomcat running inside Docker, with GitHub Actions for CI/CD.
 
-La demo cubre un flujo típico:
-1. Compilar proyecto Java
-2. Generar archivo WAR
-3. Construir imagen Docker usando Tomcat
-4. Publicar imagen en Docker Hub
-
----
-
-## 🧱 Arquitectura de la demo
-
-```
-Usuario
-  │
-  ▼
-Tomcat (Docker)
-  │
-  ├─ index.jsp   (frontend)
-  ├─ /hello      (Servlet)
-  └─ /api        (Servlet REST simple)
-```
+This demo covers a typical flow:
+1. Compile Java project
+2. Generate WAR file
+3. Build Docker image using Tomcat
+4. Push image to Docker Hub
 
 ---
 
-## 📁 Estructura del proyecto
+## 🧱 Architecture
+
+```mermaid
+flowchart TB
+    U[User / Browser]
+
+    N[HTTP Network]
+
+    subgraph C["Docker Container"]
+        T["Tomcat\n(port 8080)"]
+
+        subgraph FE["Frontend"]
+            I["index.jsp"]
+        end
+
+        subgraph BE["Backend"]
+            H["/hello\nServlet"]
+            A["/api\nREST Servlet"]
+        end
+
+        T --> I
+        T --> H
+        T --> A
+    end
+
+    U --> N --> T
+
+    %% Styles
+    classDef frontend fill:#E3F2FD,stroke:#1E88E5,stroke-width:1px
+    classDef backend fill:#E8F5E9,stroke:#43A047,stroke-width:1px
+    classDef infra fill:#FFF3E0,stroke:#FB8C00,stroke-width:1px
+
+    class I frontend
+    class H,A backend
+    class T,C infra
+```
+
+---
+
+## 📁 Project Structure
 
 ```
 java-war-demo/
 ├─ pom.xml
 ├─ Dockerfile
 ├─ README.md
+├─ README.EN.md
 ├─ .github/
 │  └─ workflows/
 │     └─ ci.yml
@@ -49,7 +74,7 @@ java-war-demo/
 
 ---
 
-## ☕ Requisitos
+## ☕ Requirements
 
 ### Local
 - Java 17+
@@ -57,20 +82,20 @@ java-war-demo/
 - Docker
 
 ### CI/CD
-- Cuenta en Docker Hub
-- Repositorio en GitHub
+- Docker Hub account
+- GitHub repository
 
 ---
 
-## 🚀 Compilación local (WAR)
+## 🚀 Local Build (WAR)
 
-Desde la carpeta donde está el `pom.xml`:
+From the directory containing `pom.xml`:
 
 ```bash
 mvn -DskipTests package
 ```
 
-Salida esperada:
+Expected output:
 
 ```
 target/app.war
@@ -78,19 +103,19 @@ target/app.war
 
 ---
 
-## 🐳 Construcción y ejecución Docker (local)
+## 🐳 Docker Build & Run (Local)
 
-### Build de la imagen
+### Build image
 ```bash
 docker build -t java-war-demo:local .
 ```
 
-### Ejecutar contenedor
+### Run container
 ```bash
 docker run --rm -p 8080:8080 java-war-demo:local
 ```
 
-### URLs de prueba
+### Test URLs
 
 - Frontend: http://localhost:8080/app/
 - Servlet: http://localhost:8080/app/hello
@@ -98,89 +123,78 @@ docker run --rm -p 8080:8080 java-war-demo:local
 
 ---
 
-## 📦 Dockerfile (resumen)
+## 📦 Dockerfile (Summary)
 
-- Usa imagen oficial `tomcat:10.1-jdk17`
-- Elimina apps por defecto
-- Copia únicamente el WAR generado
-- Arranca Tomcat en modo foreground
+- Uses official tomcat:10.1-jdk17 image
+- Removes default applications
+- Copies only the generated WAR
+- Runs Tomcat in foreground mode
 
-Esto mantiene la imagen simple y eficiente para demos.
+This keeps the image simple and efficient for demo purposes.
 
 ---
 
-## 🔁 CI/CD con GitHub Actions
+## 🔁 CI/CD with GitHub Actions
 
-Pipeline definido en:
+Pipeline defined in:
 
 ```
 .github/workflows/ci.yml
 ```
 
-### Pasos del pipeline
+### Pipeline steps
 
-1. Checkout del código
+1. Checkout source code
 2. Setup Java 17
-3. Build del WAR con Maven
-4. Login a Docker Hub
-5. Build de la imagen Docker
-6. Push a Docker Hub
+3. Build WAR using Maven
+4. Login to Docker Hub
+5. Build Docker image
+6. Push image to Docker Hub
 
-### Secrets requeridos
+### Required secrets
 
-Configurar en **Settings → Secrets and variables → Actions**:
+Configure in Settings → Secrets and variables → Actions:
 
 | Secret | Descripción |
 |------|-------------|
-| `DOCKERHUB_USERNAME` | Usuario de Docker Hub |
-| `DOCKERHUB_TOKEN` | Access Token de Docker Hub |
+| `DOCKERHUB_USERNAME` | Docker Hub username |
+| `DOCKERHUB_TOKEN` | Docker Hub access token |
 
 ---
 
-## 🏷️ Tags de la imagen
+## 🏷️ Image Tags
 
-El pipeline publica la imagen con:
+The pipeline publishes images with:
 
 - `latest`
 - `sha-<commit>`
 
-Ejemplo:
+Example:
 ```
-docker pull usuario/java-war-demo:latest
+docker pull username/java-war-demo:latest
 ```
 
 ---
 
-## 🧪 Objetivo de la demo
+## 🧪 Demo Purpose
 
-Esta demo está pensada para:
+This demo is intended to:
 
-- Mostrar un flujo **Java tradicional (WAR + Tomcat)**
-- Explicar pipelines CI/CD básicos
-- Servir como base para entrevistas DevOps / Cloud
-- Evolucionar luego a:
+- Demonstrate traditional Java deployment (WAR + Tomcat)
+- Explain basic CI/CD pipelines
+- Serve as a base for DevOps / Cloud interviews
+- Be extended later to:
   - Kubernetes
   - Helm
   - ECS / EKS / AKS
-  - Versionado semántico
+  - Semantic versioning
 
 ---
 
-## 📌 Próximos pasos (opcionales)
+## 📝 License
 
-- Versionar con Git tags (`v1.0.0`)
-- Agregar healthcheck
-- Usar multi-stage build
-- Publicar a GHCR en lugar de Docker Hub
-- Migrar a Spring Boot WAR
+Educational demo – free to use for learning and testing.
 
 ---
 
-## 📝 Licencia
-
-Demo educativa – uso libre para pruebas y aprendizaje.
-
----
-
-💡 **Tip DevOps**: este proyecto es ideal para explicar la diferencia entre *build-time* (WAR) y *runtime* (Tomcat container).
-
+💡 **DevOps Tip**: this project is ideal for explaining the difference between build-time (WAR generation) and runtime (Tomcat container).
