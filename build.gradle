@@ -1,0 +1,27 @@
+plugins {
+    id 'java'
+    id 'war'
+}
+
+group = 'com.demo'
+version = '1.0.0'
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(17)
+    }
+}
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+    compileOnly 'jakarta.servlet:jakarta.servlet-api:6.0.0' // Compile-time only for WAR deployment
+    implementation 'javax.servlet:jstl:1.2' // si tu app usa JSTL
+}
+
+war {
+    archiveBaseName.set("app-gradle")
+    archiveVersion.set(version)
+}
