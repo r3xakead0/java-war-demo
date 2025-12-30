@@ -38,6 +38,12 @@ jobs:
       - name: Checkout repo
         uses: actions/checkout@v4
 
+      - name: Download WAR artifact
+        uses: actions/download-artifact@v4
+        with:
+          name: app-war
+          path: target
+
       - name: Docker meta (tags)
         id: meta
         uses: docker/metadata-action@v5
