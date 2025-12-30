@@ -53,13 +53,17 @@ flowchart TB
 
 ```
 java-war-demo/
-├─ pom.xml
 ├─ Dockerfile
+├─ Containerfile
+├─ build.gradle
+├─ settings.gradle
+├─ pom.xml
 ├─ README.md
 ├─ README.EN.md
 ├─ .github/
 │  └─ workflows/
-│     └─ ci.yml
+│     └─ gradle-containerfile.yml
+│     └─ maven-dockerfile.yml
 └─ src/
    └─ main/
       ├─ java/
@@ -79,7 +83,9 @@ java-war-demo/
 ### Local
 - Java 17+
 - Maven 3.9+
+- Gradle 9.2+
 - Docker
+- Podman
 
 ### CI/CD
 - Cuenta en Docker Hub
@@ -89,6 +95,7 @@ java-war-demo/
 
 ## 🚀 Compilación local (WAR)
 
+### Using Maven
 Desde la carpeta donde está el `pom.xml`:
 
 ```bash
@@ -101,18 +108,43 @@ Salida esperada:
 target/app.war
 ```
 
+### Using Gradle
+From the directory containing `build.gradle` and `settings.gradle`:
+
+```bash
+gradle clean war
+```
+
+Expected output:
+
+```
+build/libs/app-gradle.war
+```
+
 ---
 
-## 🐳 Construcción y ejecución Docker (local)
+## 🐳 Construcción y ejecución com Docker (local)
 
 ### Build de la imagen
 ```bash
-docker build -t java-war-demo:local .
+docker build -f Dockerfile -t java-war-demo:local .
 ```
 
 ### Ejecutar contenedor
 ```bash
 docker run --rm -p 8080:8080 java-war-demo:local
+```
+
+## 🐧 Construcción y ejecución com Podman (Local)
+
+### Build image
+```bash
+podman build -f Containerfile -t java-war-demo:local .
+```
+
+### Run container
+```bash
+podman run --rm -p 8080:8080 java-war-demo:local
 ```
 
 ### URLs de prueba
@@ -139,16 +171,17 @@ Esto mantiene la imagen simple y eficiente para demos.
 Pipeline definido en:
 
 ```
-.github/workflows/ci.yml
+.github/workflows/gradle-containerfile.yml
+.github/workflows/maven-dockerfile.yml
 ```
 
 ### Pasos del pipeline
 
 1. Checkout del código
-2. Setup Java 17
-3. Build del WAR con Maven
+2. Setup Java 21
+3. Build del WAR con Maven o Gradle
 4. Login a Docker Hub
-5. Build de la imagen Docker
+5. Build de la imagen Docker o Podman
 6. Push a Docker Hub
 
 ### Secrets requeridos

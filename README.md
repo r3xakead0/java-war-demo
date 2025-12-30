@@ -53,13 +53,17 @@ flowchart TB
 
 ```
 java-war-demo/
-├─ pom.xml
 ├─ Dockerfile
+├─ Containerfile
+├─ build.gradle
+├─ settings.gradle
+├─ pom.xml
 ├─ README.md
 ├─ README.EN.md
 ├─ .github/
 │  └─ workflows/
-│     └─ ci.yml
+│     └─ gradle-containerfile.yml
+│     └─ maven-dockerfile.yml
 └─ src/
    └─ main/
       ├─ java/
@@ -79,7 +83,9 @@ java-war-demo/
 ### Local
 - Java 17+
 - Maven 3.9+
+- Gradle 9.2+
 - Docker
+- Podman
 
 ### CI/CD
 - Docker Hub account
@@ -89,6 +95,7 @@ java-war-demo/
 
 ## 🚀 Local Build (WAR)
 
+### Using Maven
 From the directory containing `pom.xml`:
 
 ```bash
@@ -98,7 +105,20 @@ mvn -DskipTests package
 Expected output:
 
 ```
-target/app.war
+target/app-maven.war
+```
+
+### Using Gradle
+From the directory containing `build.gradle` and `settings.gradle`:
+
+```bash
+gradle clean war
+```
+
+Expected output:
+
+```
+build/libs/app-gradle.war
 ```
 
 ---
@@ -107,12 +127,24 @@ target/app.war
 
 ### Build image
 ```bash
-docker build -t java-war-demo:local .
+docker build -f Dockerfile -t java-war-demo:local .
 ```
 
 ### Run container
 ```bash
 docker run --rm -p 8080:8080 java-war-demo:local
+```
+
+## 🐧 Podman Build & Run (Local)
+
+### Build image
+```bash
+podman build -f Containerfile -t java-war-demo:local .
+```
+
+### Run container
+```bash
+podman run --rm -p 8080:8080 java-war-demo:local
 ```
 
 ### Test URLs
@@ -125,7 +157,7 @@ docker run --rm -p 8080:8080 java-war-demo:local
 
 ## 📦 Dockerfile (Summary)
 
-- Uses official tomcat:10.1-jdk17 image
+- Uses official tomcat:10.1-jdk21 image
 - Removes default applications
 - Copies only the generated WAR
 - Runs Tomcat in foreground mode
@@ -139,16 +171,17 @@ This keeps the image simple and efficient for demo purposes.
 Pipeline defined in:
 
 ```
-.github/workflows/ci.yml
+.github/workflows/gradle-containerfile.yml
+.github/workflows/maven-dockerfile.yml
 ```
 
 ### Pipeline steps
 
 1. Checkout source code
-2. Setup Java 17
-3. Build WAR using Maven
+2. Setup Java 21
+3. Build WAR using Maven or Gradle
 4. Login to Docker Hub
-5. Build Docker image
+5. Build Docker or Podman image
 6. Push image to Docker Hub
 
 ### Required secrets
