@@ -1,12 +1,12 @@
-# Java WAR Demo (Tomcat + Docker + GitHub Actions)
+# Java WAR Demo (Tomcat + Docker / Podman + GitHub Actions)
 
-Simple demo of a Java web application (frontend + backend) packaged as a WAR, deployed on Apache Tomcat running inside Docker, with GitHub Actions for CI/CD.
+Simple demo of a  **Java web application (frontend + backend)** packaged as a  **WAR**, deployed on  **Apache Tomcat** running inside a container (**Docker** or **Podman**), with GitHub Actions for CI/CD and image publishing to  **Docker Hub** or  **GitHub Container Registry (GHCR)**.
 
 This demo covers a typical flow:
 1. Compile Java project
 2. Generate WAR file
-3. Build Docker image using Tomcat
-4. Push image to Docker Hub
+3. Build container image using Tomcat
+4. Push image to Docker Hub or GitHub Container Registry (GHCR)
 
 ---
 
@@ -88,8 +88,8 @@ java-war-demo/
 - Podman
 
 ### CI/CD
-- Docker Hub account
 - GitHub repository
+- Docker Hub account
 
 ---
 
@@ -157,7 +157,7 @@ podman run --rm -p 8080:8080 java-war-demo:local
 
 ## 📦 Dockerfile (Summary)
 
-- Uses official tomcat:10.1-jdk21 image
+- Uses official `tomcat:10.1-jdk21-temurin` image
 - Removes default applications
 - Copies only the generated WAR
 - Runs Tomcat in foreground mode
@@ -168,10 +168,9 @@ This keeps the image simple and efficient for demo purposes.
 
 ## 🔁 CI/CD with GitHub Actions
 
-Pipeline defined in:
+### Defined pipeline for using Maven, Docker, and Docker Hub in:
 
 ```
-.github/workflows/gradle-containerfile.yml
 .github/workflows/maven-dockerfile.yml
 ```
 
@@ -179,19 +178,42 @@ Pipeline defined in:
 
 1. Checkout source code
 2. Setup Java 21
-3. Build WAR using Maven or Gradle
+3. Build WAR using Maven
 4. Login to Docker Hub
-5. Build Docker or Podman image
+5. Build Docker image
 6. Push image to Docker Hub
 
 ### Required secrets
 
-Configure in Settings → Secrets and variables → Actions:
+Configure in **Settings → Secrets and variables → Actions**:
 
 | Secret | Descripción |
 |------|-------------|
 | `DOCKERHUB_USERNAME` | Docker Hub username |
 | `DOCKERHUB_TOKEN` | Docker Hub access token |
+
+### Defined pipeline for using Gradle, Podman, and GHCR in:
+
+```
+.github/workflows/gradle-containerfile.yml
+```
+
+### Pipeline steps
+
+1. Checkout source code
+2. Setup Java 21
+3. Build WAR using Gradle
+4. Login to GitHub Container registry (GHCR)
+5. Build Podman image
+6. Push image to GitHub Container registry (GHCR)
+
+### Required secrets
+
+Configure in **Settings → Secrets and variables → Actions**:
+
+| Secret | Descripción |
+|------|-------------|
+| `GITHUB_TOKEN` | Automatically provided by GitHub Actions (no manual creation required) |
 
 ---
 
@@ -202,9 +224,14 @@ The pipeline publishes images with:
 - `latest`
 - `sha-<commit>`
 
-Example:
+Example Docker Hub:
 ```
-docker pull username/java-war-demo:latest
+docker pull <dockerhub-user>/java-war-demo:latest
+```
+
+Example GHCR:
+```
+docker pull ghcr.io/<github-org-or-user>/java-war-demo:latest
 ```
 
 ---
@@ -213,7 +240,7 @@ docker pull username/java-war-demo:latest
 
 This demo is intended to:
 
-- Demonstrate traditional Java deployment (WAR + Tomcat)
+- Demonstrate traditional **Java deployment (WAR + Tomcat)**
 - Explain basic CI/CD pipelines
 - Serve as a base for DevOps / Cloud interviews
 - Be extended later to:
